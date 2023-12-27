@@ -27,7 +27,6 @@ export abstract class BeatmapHitObjectEncoder {
 
     const encoded: string[] = ['[HitObjects]'];
 
-    const difficulty = beatmap.difficulty;
     const hitObjects = beatmap.hitObjects;
 
     hitObjects.forEach((hitObject) => {
@@ -44,11 +43,9 @@ export abstract class BeatmapHitObjectEncoder {
       );
 
       if (beatmap.mode === 3) {
-        const totalColumns = Math.trunc(Math.max(1, difficulty.circleSize));
-        const multiplier = Math.round(512 / totalColumns * 100000) / 100000;
         const column = (hitObject as unknown as IHasPosition).startX;
 
-        startPosition.x = Math.ceil(column * multiplier) + Math.trunc(multiplier / 2);
+        startPosition.x = column;
       }
 
       general.push(startPosition.toString());
@@ -78,9 +75,13 @@ export abstract class BeatmapHitObjectEncoder {
 
       const set: string[] = [];
 
-      const normal = hitObject.samples.find((s) => s.hitSound === HitSound[HitSound.Normal]);
+      const normal = hitObject.samples.find(
+        (s) => s.hitSound === HitSound[HitSound.Normal],
+      );
 
-      const addition = hitObject.samples.find((s) => s.hitSound !== HitSound[HitSound.Normal]);
+      const addition = hitObject.samples.find(
+        (s) => s.hitSound !== HitSound[HitSound.Normal],
+      );
 
       let normalSet = SampleSet.None;
       let additionSet = SampleSet.None;
@@ -123,7 +124,7 @@ export abstract class BeatmapHitObjectEncoder {
       if (point.type !== null) {
         /**
          * We've reached a new (explicit) segment!
-         * 
+         *
          * Explicit segments have a new format in which the type is injected
          * into the middle of the control point string.
          * To preserve compatibility with osu-stable as much as possible,
@@ -132,8 +133,8 @@ export abstract class BeatmapHitObjectEncoder {
          * One exception are consecutive perfect curves, which aren't supported
          * in osu!stable and can lead to decoding issues if encoded as implicit segments
          */
-        let needsExplicitSegment = point.type !== lastType
-          || point.type === PathType.PerfectCurve;
+        let needsExplicitSegment =
+          point.type !== lastType || point.type === PathType.PerfectCurve;
 
         /**
          * Another exception to this is when the last two control points
@@ -158,12 +159,16 @@ export abstract class BeatmapHitObjectEncoder {
         }
         else {
           // New segment with the same type - duplicate the control point
-          path.push(`${offset.x + point.position.x}:${offset.y + point.position.y}`);
+          path.push(
+            `${offset.x + point.position.x}:${offset.y + point.position.y}`,
+          );
         }
       }
 
       if (i !== 0) {
-        path.push(`${offset.x + point.position.x}:${offset.y + point.position.y}`);
+        path.push(
+          `${offset.x + point.position.x}:${offset.y + point.position.y}`,
+        );
       }
     });
 
